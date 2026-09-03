@@ -3,6 +3,7 @@ import { and, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { bookChapters, books, postTags, posts, tags } from "@bitcraft/blog-db";
 import type { Bindings } from "./lib/bindings";
 import { getDb } from "./lib/db";
+import { callPublicApi } from "./lib/api-client";
 import { withEdgeCache, CACHE_TTL_SECONDS } from "./lib/cache";
 import { toIsoDate, toRfc822Date } from "./lib/format";
 import { mediaUrl } from "./lib/media-url";
@@ -212,6 +213,7 @@ app.get("/posts/:slug", async (c) => {
           adsenseClientId={c.env.ADSENSE_CLIENT_ID}
         >
           <PostDetailPage
+            slug={row.slug}
             title={row.title}
             ogImageKey={row.ogImageKey}
             bodyHtml={row.bodyHtml}
@@ -219,6 +221,7 @@ app.get("/posts/:slug", async (c) => {
             publishedAt={row.publishedAt}
             authorName={row.authorName}
             readingTimeMin={row.readingTimeMin}
+            likeCount={row.likeCount}
             tags={postTagList}
             adsenseClientId={c.env.ADSENSE_CLIENT_ID}
           />
@@ -226,6 +229,19 @@ app.get("/posts/:slug", async (c) => {
       ),
     );
   });
+});
+
+// POST /posts/:slug/like・/unlike ----------------------------------------------------
+// Zenn風の「ハート」ボタン用。apps/web自身はD1に書き込まず、Service Binding経由で
+// apps/apiへそのまま委譲する（実装プラン9章、ユーザー指示により2026-09-04追加）。
+app.post("/posts/:slug/like", async (c) => {
+  const res = await callPublicApi(c.env, `/v1/posts/${c.req.param("slug")}/like`);
+  return new Response(res.body, { status: res.status, headers: { "content-type": "application/json" } });
+});
+
+app.post("/posts/:slug/unlike", async (c) => {
+  const res = await callPublicApi(c.env, `/v1/posts/${c.req.param("slug")}/unlike`);
+  return new Response(res.body, { status: res.status, headers: { "content-type": "application/json" } });
 });
 
 // GET /tags/:slug --------------------------------------------------------------------

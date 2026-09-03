@@ -26,6 +26,17 @@
       "bucket_name": "bitcraft-blog-media"
     }
   ],
+  // 「いいね」ボタン（POST /posts/:slug/like・/unlike）をapps/apiへ委譲するための
+  // Service Binding（実装プラン9章と同じ委譲パターン。bitcraft-siteのフォームPOST
+  // 委譲と同じ考え方。ユーザー指示により2026-09-04追加）。apps/web自身のD1書き込みは
+  // 引き続き行わない。ローカルのDocker Compose環境ではService Bindingが使えないため
+  // API_BASE_URL（例: http://api:8788）へのHTTPフォールバックをlib/api-client.tsが持つ。
+  "services": [
+    {
+      "binding": "API",
+      "service": "bitcraft-blog-api"
+    }
+  ],
   // src/styles/*.css をText moduleとしてimportし、ビルド無しで<style>タグへ
   // インライン配信するためのルール（実装プラン6章「素のCSS・ビルドステップ不要」）。
   "rules": [

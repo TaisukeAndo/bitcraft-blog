@@ -37,6 +37,11 @@ export const posts = sqliteTable(
     // note併載時など、正規URLを自己canonical以外に上書きしたい場合に使う。
     canonicalUrl: text("canonical_url"),
     noindex: integer("noindex", { mode: "boolean" }).notNull().default(false),
+    // Zenn風の「ハート」ボタンのいいね数（ユーザー指示により2026-09-04追加）。
+    // アカウント機能が無いため訪問者単位の重複防止はブラウザのlocalStorage側で行う
+    // （apps/web/public/js/article-actions.js参照）。0未満にはならない
+    // （CHECK制約、下記likeCountNonnegative）。
+    likeCount: integer("like_count").notNull().default(0),
     createdAt: text("created_at")
       .notNull()
       .default(sql`(current_timestamp)`),
@@ -46,6 +51,7 @@ export const posts = sqliteTable(
   },
   (table) => ({
     slugUnique: unique("posts_slug_unique").on(table.slug),
+    likeCountNonnegative: check("posts_like_count_nonnegative", sql`${table.likeCount} >= 0`),
     statusIdx: index("posts_status_idx").on(table.status),
     publishedAtIdx: index("posts_published_at_idx").on(table.publishedAt),
     slugFormat: check("posts_slug_format", sql`${table.slug} glob '[a-z0-9-]*'`),

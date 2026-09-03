@@ -43,6 +43,7 @@ export interface Post {
   metaKeywords: string | null;
   canonicalUrl: string | null;
   noindex: boolean;
+  likeCount: number;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;

@@ -60,8 +60,16 @@ export async function checkApiKey(c: Context<{ Bindings: Bindings }>): Promise<R
 //   認証を課さない（実物bitcraft-cmsも同様の想定）。
 const PUBLIC_PATHS = new Set(["/v1/health", "/v1/auth/verify", "/openapi.json", "/docs"]);
 
+// - /v1/posts/{slug}/like・/unlike: サイト訪問者がapps/web経由（Service Binding、
+//   実装プラン9章と同じ委譲パターン）でクリックする「いいね」ボタン用。CMS操作用の
+//   Bearer認証を持たない匿名の一般訪問者からのリクエストのため認証対象外にする
+//   （ユーザー指示により2026-09-04追加。routes/posts.ts参照）。
+const PUBLIC_PATH_PATTERNS = [/^\/v1\/posts\/[^/]+\/(like|unlike)$/];
+
 function isPublicPath(path: string): boolean {
-  return PUBLIC_PATHS.has(path) || path.startsWith("/docs/");
+  return (
+    PUBLIC_PATHS.has(path) || path.startsWith("/docs/") || PUBLIC_PATH_PATTERNS.some((re) => re.test(path))
+  );
 }
 
 /**

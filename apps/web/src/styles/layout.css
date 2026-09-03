@@ -211,13 +211,14 @@
   color: var(--color-accent);
 }
 
-/* 記事詳細: 本文幅720-760px中央寄せ＋デスクトップ右マージンの追従目次 */
+/* 記事詳細: 左にいいね/シェアボタン（Zenn風、実装プラン6章に追記）、中央に本文
+   （幅720-760px）、右にデスクトップ限定の追従目次。 */
 .article-layout {
   display: grid;
-  grid-template-columns: minmax(0, var(--content-width)) minmax(200px, 260px);
+  grid-template-columns: 56px minmax(0, var(--content-width)) minmax(200px, 260px);
   gap: var(--space-7);
   justify-content: center;
-  max-width: 1080px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-5) var(--space-8);
 }
@@ -227,13 +228,85 @@
     grid-template-columns: minmax(0, var(--content-width));
     justify-content: center;
   }
-  .article-layout .toc-sidebar {
+  .article-layout .toc-sidebar,
+  .article-layout .article-actions {
     display: none;
   }
 }
 
 .article-main {
   min-width: 0;
+  /* grid-template-columnsの並び（actions, main, toc）に対してarticle-mainは
+     常に2番目に出力される（pages/post-detail.tsxのDOM順）。 */
+  grid-column: 2;
+}
+
+/* 左固定のいいね/シェアボタン（Zennを参考にしたUI。ユーザー指示により2026-09-04追加）。 */
+.article-actions {
+  grid-column: 1;
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-6));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  height: max-content;
+}
+
+.article-actions__like {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 48px;
+  padding: var(--space-2) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  color: var(--color-text-meta);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.article-actions__like:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.article-actions__like:active {
+  transform: scale(0.95);
+}
+
+.article-actions__like[data-liked="true"] {
+  border-color: #e0435c;
+  color: #e0435c;
+  background: #fdeef1;
+}
+
+.article-actions__like[data-liked="true"] svg path {
+  fill: #e0435c;
+}
+
+.article-actions__count {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.article-actions__share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text-meta);
+}
+
+.article-actions__share:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  text-decoration: none;
 }
 
 .article-header {

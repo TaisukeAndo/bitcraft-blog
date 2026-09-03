@@ -41,6 +41,7 @@ const postResponseSchema = z.object({
   metaKeywords: z.string().nullable(),
   canonicalUrl: z.string().nullable(),
   noindex: z.boolean(),
+  likeCount: z.number(),
   tags: z.array(tagResponseSchema),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -85,6 +86,7 @@ function toPostResponse(row: PostRow, tagList: Tag[]): Post {
     metaKeywords: row.metaKeywords,
     canonicalUrl: row.canonicalUrl,
     noindex: row.noindex,
+    likeCount: row.likeCount,
     tags: tagList,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -225,6 +227,7 @@ export function registerPostRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
     if (tagIdsOrError instanceof Response) return tagIdsOrError;
 
     const rendered = await renderMarkdown(body.bodyMd);
+    const status = body.status ?? "draft";
 
     const inserted = await db
       .insert(posts)
@@ -236,7 +239,11 @@ export function registerPostRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
         bodyHtml: rendered.html,
         tocJson: JSON.stringify(rendered.toc),
         readingTimeMin: rendered.readingTimeMin,
-        status: body.status ?? "draft",
+        status,
+        // status="published"で新規作成された場合もpublished_atを設定する
+        // （publishRouteを経由しない一発公開のケース。この分岐が無いと
+        // 「公開済みなのにpublished_atがnull」のまま残るバグになる。実機で確認・修正）。
+        ...(status === "published" ? { publishedAt: new Date().toISOString() } : {}),
         ...(body.authorName !== undefined ? { authorName: body.authorName } : {}),
         ogImageKey: body.ogImageKey ?? null,
         metaDescription: body.metaDescription,
@@ -326,6 +333,12 @@ export function registerPostRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
       readingTimeMin = rendered.readingTimeMin;
     }
 
+    const nextStatus = body.status ?? existing.status;
+    // PATCHでstatusをpublishedへ変更した際もpublished_atが未設定なら設定する
+    // （post_publishを経由しない直接更新のケース。posts作成時と同じ理由の修正）。
+    const nextPublishedAt =
+      nextStatus === "published" && !existing.publishedAt ? new Date().toISOString() : existing.publishedAt;
+
     await db
       .update(posts)
       .set({
@@ -335,7 +348,8 @@ export function registerPostRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
         bodyHtml,
         tocJson,
         readingTimeMin,
-        status: body.status ?? existing.status,
+        status: nextStatus,
+        publishedAt: nextPublishedAt,
         authorName: body.authorName ?? existing.authorName,
         ogImageKey: body.ogImageKey === undefined ? existing.ogImageKey : body.ogImageKey,
         metaDescription: body.metaDescription ?? existing.metaDescription,
@@ -471,5 +485,80 @@ export function registerPostRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
     if (!updated) return jsonError(c, "INTERNAL_ERROR", "再レンダリング後のpost取得に失敗しました", 500);
     const tagsByPostId = await loadTagsByPostId(db, [updated.id]);
     return c.json(toPostResponse(updated, tagsByPostId.get(updated.id) ?? []), 200);
+  });
+
+  // POST /v1/posts/{slug}/like・/unlike -------------------------------------------------
+  // Zenn風の「ハート」ボタン用（実装プラン7章に追記、ユーザー指示により2026-09-04追加）。
+  // サイト訪問者（CMS操作用のBearerトークンを持たない匿名ユーザー）がapps/web経由
+  // （Service Binding、実装プラン9章と同じ委譲パターン）で叩くため、
+  // middleware/auth.tsのPUBLIC_PATH_PATTERNSで認証対象外にしている。
+  // 同一ブラウザからの多重カウントはapps/web側（localStorageでのトグル管理、
+  // public/js/article-actions.js）で防ぐ想定で、サーバー側は素朴な加減算のみ行う。
+  const likeResponseSchema = z.object({ likeCount: z.number() });
+
+  const likeRoute = createRoute({
+    method: "post",
+    path: "/v1/posts/{slug}/like",
+    summary: "記事のいいね数を1増やす（認証不要・サイト訪問者向け）",
+    tags: ["posts"],
+    request: { params: z.object({ slug: z.string() }) },
+    responses: {
+      200: { description: "更新後のいいね数", content: { "application/json": { schema: likeResponseSchema } } },
+      404: { description: "見つからない、または公開されていない" },
+    },
+  });
+
+  app.openapi(likeRoute, async (c) => {
+    const { slug } = c.req.valid("param");
+    const db = getDb(c.env);
+    const existing = await db
+      .select({ id: posts.id, status: posts.status })
+      .from(posts)
+      .where(eq(posts.slug, slug))
+      .get();
+    if (!existing || existing.status !== "published") {
+      return jsonError(c, "NOT_FOUND", `post '${slug}' が見つかりません`, 404);
+    }
+
+    await db
+      .update(posts)
+      .set({ likeCount: sql`${posts.likeCount} + 1` })
+      .where(eq(posts.id, existing.id))
+      .run();
+    const updated = await db.select({ likeCount: posts.likeCount }).from(posts).where(eq(posts.id, existing.id)).get();
+    return c.json({ likeCount: updated?.likeCount ?? 0 }, 200);
+  });
+
+  const unlikeRoute = createRoute({
+    method: "post",
+    path: "/v1/posts/{slug}/unlike",
+    summary: "記事のいいね数を1減らす（0未満にはしない。認証不要・サイト訪問者向け）",
+    tags: ["posts"],
+    request: { params: z.object({ slug: z.string() }) },
+    responses: {
+      200: { description: "更新後のいいね数", content: { "application/json": { schema: likeResponseSchema } } },
+      404: { description: "見つからない、または公開されていない" },
+    },
+  });
+
+  app.openapi(unlikeRoute, async (c) => {
+    const { slug } = c.req.valid("param");
+    const db = getDb(c.env);
+    const existing = await db
+      .select({ id: posts.id, status: posts.status })
+      .from(posts)
+      .where(eq(posts.slug, slug))
+      .get();
+    if (!existing || existing.status !== "published") {
+      return jsonError(c, "NOT_FOUND", `post '${slug}' が見つかりません`, 404);
+    }
+
+    await db
+      .update(posts)
+      .set({ likeCount: sql`max(${posts.likeCount} - 1, 0)` })
+      .where(eq(posts.id, existing.id))
+      .run();
+    const updated = await db.select({ likeCount: posts.likeCount }).from(posts).where(eq(posts.id, existing.id)).get();
+    return c.json({ likeCount: updated?.likeCount ?? 0 }, 200);
   });
 }

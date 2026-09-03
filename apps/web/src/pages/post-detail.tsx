@@ -4,9 +4,12 @@ import { formatDate, readingTimeLabel } from "../lib/format";
 import { mediaUrl } from "../lib/media-url";
 import { TagPill } from "../components/tag-pill";
 import { AdSlot } from "../components/ads/AdSlot";
+import { ArticleActions } from "../components/article-actions";
 import { splitBodyForInlineAd } from "../lib/content-ads";
+import { SITE_ORIGIN } from "../lib/seo/meta";
 
 export interface PostDetailPageProps {
+  slug: string;
   title: string;
   ogImageKey: string | null; // トップ画像。未設定なら領域自体を出さない（ユーザー指示により2026-09-04追加）
   bodyHtml: string | null; // nullなら「準備中」のフォールバック表示（実装プラン5章の防御的取り扱い）
@@ -14,11 +17,13 @@ export interface PostDetailPageProps {
   publishedAt: string | null;
   authorName: string;
   readingTimeMin: number | null;
+  likeCount: number;
   tags: { slug: string; name: string }[];
   adsenseClientId?: string;
 }
 
 export const PostDetailPage: FC<PostDetailPageProps> = ({
+  slug,
   title,
   ogImageKey,
   bodyHtml,
@@ -26,6 +31,7 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
   publishedAt,
   authorName,
   readingTimeMin,
+  likeCount,
   tags,
   adsenseClientId,
 }) => {
@@ -35,6 +41,8 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
 
   return (
     <main class="article-layout">
+      <ArticleActions slug={slug} likeCount={likeCount} shareUrl={`${SITE_ORIGIN}/posts/${slug}`} shareText={title} />
+
       <div class="article-main">
         <div class="article-header">
           <nav class="article-header__breadcrumb" aria-label="パンくずリスト">

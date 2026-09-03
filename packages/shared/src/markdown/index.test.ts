@@ -4,11 +4,16 @@ import { renderMarkdown } from "./index";
 describe("renderMarkdown", () => {
   it("見出しをスラッグ化しTOCを抽出する", async () => {
     const result = await renderMarkdown("# はじめに\n\n本文。\n\n## 次の章\n\n続き。");
+    // toc_jsonのdepthはMarkdown上の相対階層（#=1, ##=2）をそのまま使う。
     expect(result.toc).toEqual([
       { depth: 1, text: "はじめに", id: expect.any(String) },
       { depth: 2, text: "次の章", id: expect.any(String) },
     ]);
-    expect(result.html).toContain("<h1");
+    // 実際のHTMLタグは1段シフトする（ページの<h1>は記事タイトルが使うため、
+    // 本文中に複数の<h1>が並ばないようにする。実装プラン5章・shift-headings.ts）。
+    expect(result.html).not.toContain("<h1");
+    expect(result.html).toContain("<h2");
+    expect(result.html).toContain("<h3");
     expect(result.readingTimeMin).toBeGreaterThanOrEqual(1);
   });
 

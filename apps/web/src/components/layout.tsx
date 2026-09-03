@@ -124,6 +124,7 @@ export const Layout: FC<LayoutProps> = ({
         <script src="/js/video-embed.js" defer></script>
         <script src="/js/code-block.js" defer></script>
         <script src="/js/toc-scrollspy.js" defer></script>
+        <script src="/js/article-actions.js" defer></script>
         {adsenseClientId ? (
           <script
             dangerouslySetInnerHTML={{
