@@ -13,11 +13,11 @@
     {
       "binding": "DB",
       "database_name": "bitcraft-blog",
-      // apps/api/wrangler.jsonc と必ず同じ値にする（terraform apply後に同じ実IDへ
-      // 置き換える）。ローカル開発でもwranglerはdatabase_idをキーにD1のローカル
-      // SQLiteファイルを分けて永続化するため、値がずれるとapps/apiで作成した
-      // データがapps/webから「no such table」で見えなくなる不具合を実機で確認した。
-      "database_id": "REPLACE_AFTER_TERRAFORM_APPLY"
+      // apps/api/wrangler.jsonc と必ず同じ値にする。ローカル開発でもwranglerは
+      // database_idをキーにD1のローカルSQLiteファイルを分けて永続化するため、
+      // 値がずれるとapps/apiで作成したデータがapps/webから「no such table」で
+      // 見えなくなる不具合を実機で確認した。
+      "database_id": "e242bd88-3ec4-4b2c-8073-9e3b662f6f9c"
     }
   ],
   "r2_buckets": [

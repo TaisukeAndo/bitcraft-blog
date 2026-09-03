@@ -7,9 +7,7 @@
     {
       "binding": "DB",
       "database_name": "bitcraft-blog",
-      // terraform apply（実装プラン10章・storage.tf）実行後、Cloudflareが払い出す
-      // 実際のD1データベースIDに置き換える。それまではこのプレースホルダーのまま。
-      "database_id": "REPLACE_AFTER_TERRAFORM_APPLY",
+      "database_id": "e242bd88-3ec4-4b2c-8073-9e3b662f6f9c",
       "migrations_dir": "../../packages/db/migrations"
     }
   ],
