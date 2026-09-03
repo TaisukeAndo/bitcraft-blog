@@ -1,12 +1,14 @@
 import type { FC } from "hono/jsx";
 import type { TocEntry } from "@bitcraft/blog-shared";
 import { formatDate, readingTimeLabel } from "../lib/format";
+import { mediaUrl } from "../lib/media-url";
 import { TagPill } from "../components/tag-pill";
 import { AdSlot } from "../components/ads/AdSlot";
 import { splitBodyForInlineAd } from "../lib/content-ads";
 
 export interface PostDetailPageProps {
   title: string;
+  ogImageKey: string | null; // トップ画像。未設定なら領域自体を出さない（ユーザー指示により2026-09-04追加）
   bodyHtml: string | null; // nullなら「準備中」のフォールバック表示（実装プラン5章の防御的取り扱い）
   toc: TocEntry[];
   publishedAt: string | null;
@@ -18,6 +20,7 @@ export interface PostDetailPageProps {
 
 export const PostDetailPage: FC<PostDetailPageProps> = ({
   title,
+  ogImageKey,
   bodyHtml,
   toc,
   publishedAt,
@@ -28,6 +31,7 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
 }) => {
   const reading = readingTimeLabel(readingTimeMin);
   const headingToc = toc.filter((entry) => entry.depth <= 3);
+  const heroImage = mediaUrl(ogImageKey);
 
   return (
     <main class="article-layout">
@@ -36,6 +40,9 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
           <nav class="article-header__breadcrumb" aria-label="パンくずリスト">
             <a href="/">記事一覧</a> / <span>{title}</span>
           </nav>
+          {heroImage ? (
+            <img class="article-header__hero" src={heroImage} alt="" width={1200} height={630} />
+          ) : null}
           <h1>{title}</h1>
           <div class="article-meta">
             <span>{authorName}</span>
@@ -46,9 +53,7 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
 
         {bodyHtml ? (
           <>
-            <div class="ad-slot-wrap">
-              <AdSlot placement="in-article-top" adsenseClientId={adsenseClientId} />
-            </div>
+            <AdSlot placement="in-article-top" adsenseClientId={adsenseClientId} />
             {(() => {
               const { before, after } = splitBodyForInlineAd(bodyHtml);
               return (
@@ -56,9 +61,7 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
                   <div class="prose" dangerouslySetInnerHTML={{ __html: before }} />
                   {after ? (
                     <>
-                      <div class="ad-slot-wrap">
-                        <AdSlot placement="in-article-bottom" adsenseClientId={adsenseClientId} lazy />
-                      </div>
+                      <AdSlot placement="in-article-bottom" adsenseClientId={adsenseClientId} lazy />
                       <div class="prose" dangerouslySetInnerHTML={{ __html: after }} />
                     </>
                   ) : null}
@@ -91,6 +94,7 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({
               </li>
             ))}
           </ol>
+          <AdSlot placement="toc-below" adsenseClientId={adsenseClientId} lazy />
         </aside>
       ) : null}
     </main>

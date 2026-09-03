@@ -1,7 +1,6 @@
 import type { FC } from "hono/jsx";
 import { PostCard, type PostCardData } from "../components/post-card";
 import { Pagination } from "../components/pagination";
-import { AdSlot } from "../components/ads/AdSlot";
 
 export interface PopularTag {
   slug: string;
@@ -21,36 +20,17 @@ export interface HomePageProps {
   popularTags: PopularTag[];
   archive: ArchiveMonth[];
   query?: string;
-  adsenseClientId?: string;
 }
 
-// 数件ごとにネイティブ風広告カードを挟む間隔（実装プラン8章）。
-const AD_CARD_INTERVAL = 6;
-
-export const HomePage: FC<HomePageProps> = ({
-  posts,
-  currentPage,
-  totalPages,
-  popularTags,
-  archive,
-  query,
-  adsenseClientId,
-}) => {
+// 検索フォームはヘッダー（components/header.tsx）に集約したため、このページ自体は
+// 持たない（ユーザー指示により2026-09-04変更）。広告も一覧ページには置かず記事詳細
+// ページ内のみに限定する（実装プラン8章の方針をさらに絞り込み）。
+export const HomePage: FC<HomePageProps> = ({ posts, currentPage, totalPages, popularTags, archive, query }) => {
   return (
     <main class="page-container">
       <div class="page-header">
         <h1>{query ? `「${query}」の検索結果` : "記事一覧"}</h1>
         <p>AIを学ぶ人のための技術記事とBookを配信しています。</p>
-        <form class="search-form" method="get" action="/">
-          <input
-            type="search"
-            name="q"
-            value={query ?? ""}
-            placeholder="記事を検索"
-            aria-label="記事を検索"
-          />
-          <button type="submit">検索</button>
-        </form>
       </div>
 
       <div class="list-layout">
@@ -59,15 +39,8 @@ export const HomePage: FC<HomePageProps> = ({
             <p>該当する記事がありません。</p>
           ) : (
             <div class="card-grid">
-              {posts.map((post, index) => (
-                <>
-                  <PostCard post={post} />
-                  {(index + 1) % AD_CARD_INTERVAL === 0 && index !== posts.length - 1 ? (
-                    <div class="post-card post-card--ad">
-                      <AdSlot placement="list-native" adsenseClientId={adsenseClientId} lazy />
-                    </div>
-                  ) : null}
-                </>
+              {posts.map((post) => (
+                <PostCard post={post} />
               ))}
             </div>
           )}
@@ -79,39 +52,37 @@ export const HomePage: FC<HomePageProps> = ({
           />
         </div>
 
-        <aside class="list-sidebar">
-          {popularTags.length > 0 ? (
-            <div class="list-sidebar__section">
-              <h2>人気タグ</h2>
-              <div class="list-sidebar__tags">
-                {popularTags.map((tag) => (
-                  <a class="tag-pill tag-pill--count" href={`/tags/${tag.slug}`} data-count={`(${tag.count})`}>
-                    {tag.name}
-                  </a>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {archive.length > 0 ? (
-            <div class="list-sidebar__section">
-              <h2>アーカイブ</h2>
-              <ul class="list-sidebar__archive">
-                {archive.map((entry) => (
-                  <li>
-                    <a href={`/?month=${entry.month}`}>
-                      {entry.month.replace("-", "年")}月（{entry.count}）
+        {popularTags.length > 0 || archive.length > 0 ? (
+          <aside class="list-sidebar">
+            {popularTags.length > 0 ? (
+              <div class="list-sidebar__section">
+                <h2>人気タグ</h2>
+                <div class="list-sidebar__tags">
+                  {popularTags.map((tag) => (
+                    <a class="tag-pill tag-pill--count" href={`/tags/${tag.slug}`} data-count={`(${tag.count})`}>
+                      {tag.name}
                     </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-          <div class="ad-slot-wrap ad-slot-wrap--sidebar">
-            <AdSlot placement="sidebar" adsenseClientId={adsenseClientId} lazy />
-          </div>
-        </aside>
+            {archive.length > 0 ? (
+              <div class="list-sidebar__section">
+                <h2>アーカイブ</h2>
+                <ul class="list-sidebar__archive">
+                  {archive.map((entry) => (
+                    <li>
+                      <a href={`/?month=${entry.month}`}>
+                        {entry.month.replace("-", "年")}月（{entry.count}）
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </aside>
+        ) : null}
       </div>
     </main>
   );

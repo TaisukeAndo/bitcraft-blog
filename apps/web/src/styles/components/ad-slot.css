@@ -1,5 +1,7 @@
-/* 広告枠。実際の広告有無に関わらず固定min-heightを確保しCLSを防ぐ（実装プラン8章）。
-   Phase4本格導入までは空のプレースホルダーとして描画される（public/js/ads.js参照）。 */
+/* 広告枠。AdSense未導入の間はAdSlotコンポーネントが何も描画しない（空の灰色枠は
+   残さない。ユーザー指示により2026-09-04変更）。ADSENSE_CLIENT_ID設定後は
+   固定min-heightを確保しCLSを防ぐ（実装プラン8章。public/js/ads.js参照）。
+   配置は記事詳細ページ内（本文冒頭・本文中・目次の下）のみ。 */
 .ad-slot {
   width: 100%;
   display: flex;
@@ -9,15 +11,6 @@
   overflow: hidden;
 }
 
-.ad-slot--empty {
-  background: var(--color-bg-subtle);
-  border: 1px dashed var(--color-border-strong);
-}
-
 .ad-slot-wrap {
   margin: var(--space-6) 0;
-}
-
-.ad-slot-wrap--sidebar {
-  margin: 0;
 }

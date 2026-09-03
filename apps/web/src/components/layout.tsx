@@ -47,6 +47,9 @@ export type LayoutProps = PropsWithChildren<{
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
   adsenseClientId?: string;
+  // ホームの検索結果表示時のみ、ヘッダー検索欄にキーワードを復元するために使う
+  // （components/header.tsxのHeaderProps参照）。
+  searchQuery?: string;
 }>;
 
 // 全ページ共通のHTML骨格。<style>への直inline配信・OGP/JSON-LD・広告/動画埋め込み用
@@ -62,6 +65,7 @@ export const Layout: FC<LayoutProps> = ({
   noindex = false,
   jsonLd = [],
   adsenseClientId,
+  searchQuery,
   children,
 }) => {
   const canonicalUrl = canonicalUrlOverride ?? buildCanonicalUrl(canonicalPath);
@@ -91,7 +95,8 @@ export const Layout: FC<LayoutProps> = ({
         )}
         <link rel="canonical" href={canonicalUrl} />
         <link rel="alternate" type="application/rss+xml" title={SITE_NAME} href="/rss.xml" />
-        <link rel="icon" href="data:," />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
@@ -112,7 +117,7 @@ export const Layout: FC<LayoutProps> = ({
         <style dangerouslySetInnerHTML={{ __html: ALL_CSS }} />
       </head>
       <body>
-        <Header />
+        <Header searchQuery={searchQuery} />
         {children}
         <Footer />
 

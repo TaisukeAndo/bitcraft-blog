@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { mediaUrl } from "../lib/media-url";
 import { Badge } from "../components/tag-pill";
+import { ThumbPlaceholder } from "../components/thumb-placeholder";
 
 export interface BookListItem {
   slug: string;
@@ -32,7 +33,7 @@ export const BookListPage: FC<{ books: BookListItem[] }> = ({ books }) => {
                     {cover ? (
                       <img src={cover} alt="" width={640} height={360} loading="lazy" />
                     ) : (
-                      <div class="post-card__thumb--placeholder">Book</div>
+                      <ThumbPlaceholder kind="book" />
                     )}
                   </div>
                   <div class="post-card__body">

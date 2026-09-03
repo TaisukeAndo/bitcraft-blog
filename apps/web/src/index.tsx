@@ -149,6 +149,7 @@ app.get("/", async (c) => {
           description="AIを学ぶ人のための技術記事とBookを配信しています。"
           canonicalPath="/"
           adsenseClientId={c.env.ADSENSE_CLIENT_ID}
+          searchQuery={q}
           jsonLd={jsonLd}
         >
           <HomePage
@@ -158,7 +159,6 @@ app.get("/", async (c) => {
             popularTags={popularTags}
             archive={archive}
             query={q}
-            adsenseClientId={c.env.ADSENSE_CLIENT_ID}
           />
         </Layout>,
       ),
@@ -213,6 +213,7 @@ app.get("/posts/:slug", async (c) => {
         >
           <PostDetailPage
             title={row.title}
+            ogImageKey={row.ogImageKey}
             bodyHtml={row.bodyHtml}
             toc={toc}
             publishedAt={row.publishedAt}

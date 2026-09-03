@@ -40,13 +40,15 @@
   object-fit: cover;
 }
 
-.post-card__thumb--placeholder {
+/* サムネイル未設定時のアイコン（components/thumb-placeholder.tsx）。
+   post-card・book-list（book-sidebar.css参照）両方で共通利用。 */
+.thumb-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-border-strong);
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
 }
 
 .post-card__body {
@@ -92,9 +94,4 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-}
-
-/* 一覧内ネイティブ風広告カード（数件毎に差し込む。実装プラン8章） */
-.post-card--ad {
-  border-style: dashed;
 }

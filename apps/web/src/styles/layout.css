@@ -19,7 +19,6 @@
   padding: 0 var(--space-5);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-5);
 }
 
@@ -28,6 +27,7 @@
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--color-text);
+  flex-shrink: 0;
 }
 
 .site-header__logo:hover {
@@ -35,9 +35,60 @@
   text-decoration: none;
 }
 
+/* ヘッダー検索フォーム（ユーザー指示により2026-09-04、一覧ページから移設）。
+   全ページ共通で表示し、常にトップページの検索結果（GET /?q=...）へ送る。 */
+.site-header__search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 280px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.site-header__search input[type="search"] {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.site-header__search input[type="search"]:focus {
+  outline: none;
+}
+
+.site-header__search button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  align-self: stretch;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-meta);
+  cursor: pointer;
+}
+
+.site-header__search button:hover {
+  color: var(--color-accent);
+}
+
 .site-header__nav {
   display: flex;
   gap: var(--space-5);
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .site-header__search {
+    max-width: 140px;
+  }
 }
 
 .site-header__nav a {
@@ -101,41 +152,6 @@
 .page-header p {
   color: var(--color-text-meta);
   margin: 0 0 var(--space-4);
-}
-
-.search-form {
-  display: flex;
-  gap: var(--space-2);
-  max-width: 360px;
-}
-
-.search-form input[type="search"] {
-  flex: 1;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-family: inherit;
-}
-
-.search-form input[type="search"]:focus {
-  outline: 2px solid var(--color-accent-tint);
-  border-color: var(--color-accent);
-}
-
-.search-form button {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-accent);
-  background: var(--color-accent);
-  color: #ffffff;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.search-form button:hover {
-  background: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
 }
 
 .list-layout {
@@ -232,6 +248,18 @@
 
 .article-header__breadcrumb a {
   color: var(--color-text-meta);
+}
+
+/* トップ画像。og_image_key未設定の記事はpost-detail.tsx側で要素自体を出さない
+   ため、ここでは「画像がある場合」のスタイルだけを持てばよい
+   （ユーザー指示により2026-09-04追加。空の枠は残さない）。 */
+.article-header__hero {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1200 / 630;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
 }
 
 .article-header h1 {

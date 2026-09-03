@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { mediaUrl } from "../lib/media-url";
 import { formatDate, readingTimeLabel } from "../lib/format";
 import { TagPill } from "./tag-pill";
+import { ThumbPlaceholder } from "./thumb-placeholder";
 
 export interface PostCardData {
   slug: string;
@@ -24,11 +25,7 @@ export const PostCard: FC<{ post: PostCardData }> = ({ post }) => {
     <article class="post-card">
       <a class="post-card__link" href={`/posts/${post.slug}`}>
         <div class="post-card__thumb">
-          {thumb ? (
-            <img src={thumb} alt="" width={640} height={360} loading="lazy" />
-          ) : (
-            <div class="post-card__thumb--placeholder">bitcraft blog</div>
-          )}
+          {thumb ? <img src={thumb} alt="" width={640} height={360} loading="lazy" /> : <ThumbPlaceholder />}
         </div>
         <div class="post-card__body">
           <h3 class="post-card__title">{post.title}</h3>
