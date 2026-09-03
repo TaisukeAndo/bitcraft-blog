@@ -11,17 +11,15 @@
 # 限定した権限）を AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY として渡す
 # （アカウント全体を操作できる CLOUDFLARE_API_TOKEN とは別物）。
 #
-# endpoints.s3 の <account-hash> は実在のアカウントハッシュではなくプレースホルダー。
-# `terraform init` 実行前に、ご自身の Cloudflare アカウントの R2 S3互換エンドポイント
-# （Cloudflareダッシュボード → R2 → 該当バケットの「S3 API」欄で確認できる）に
-# 書き換えること。
+# endpoints.s3 はbitcraftのCloudflareアカウントID（59a8b4226712e138bd4101ca59aaef41）を
+# 使ったR2 S3互換エンドポイント。アカウントを移行する場合はここを書き換えること。
 terraform {
   backend "s3" {
     bucket = "bitcraft-blog-tfstate"
     key    = "production/terraform.tfstate"
     region = "auto"
     endpoints = {
-      s3 = "https://<account-hash>.r2.cloudflarestorage.com"
+      s3 = "https://59a8b4226712e138bd4101ca59aaef41.r2.cloudflarestorage.com"
     }
     skip_credentials_validation = true
     skip_metadata_api_check     = true

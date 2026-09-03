@@ -1,10 +1,8 @@
 # terraform.tfvars.example
 #
 # コピーして terraform.tfvars を作り、実際の値を記入する。
-# terraform.tfvars 自体は .gitignore 対象ではないため、account_id のような
-# 機微情報を直書きしない場合は commit しないこと（本リポジトリでは
-# CI からは TF_VAR_account_id 環境変数で渡すため、terraform.tfvars は
-# ローカルでの terraform plan/apply 確認用にのみ使う想定）。
+# terraform.tfvars 自体は .gitignore 対象（CIからは TF_VAR_account_id 環境変数で
+# 渡すため、terraform.tfvars はローカルでの terraform plan/apply 確認用にのみ使う）。
 
 account_id = "your-cloudflare-account-id"
 
