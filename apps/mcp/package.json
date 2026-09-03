@@ -1,0 +1,23 @@
+{
+  "name": "@bitcraft/blog-mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bitcraft/blog-shared": "workspace:*",
+    "@modelcontextprotocol/server": "2.0.0",
+    "agents": "^0.21.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@bitcraft/blog-config": "workspace:*",
+    "@cloudflare/workers-types": "^5.20260821.1",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.0.0"
+  }
+}

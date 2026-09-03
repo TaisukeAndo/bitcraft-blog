@@ -1,0 +1,93 @@
+# ローカル開発用。本番はCIからの `wrangler deploy` によるCloudflare Workersへの
+# エッジデプロイであり、このComposeファイルはコンテナ配信を目的としない。
+#
+# 使い方（リポジトリルートから）:
+#   docker compose -f docker/docker-compose.yml up
+#
+# 依存関係のインストールは専用の install サービスが最初に1回だけ実行し、
+# 名前付きボリューム node_modules に保存する。api/web/mcpの3サービスは
+# それが完了してから起動する（3コンテナが同時に pnpm install を走らせて
+# 競合するのを避けるため）。node_modulesを名前付きボリューム（コンテナ内蔵）に
+# 置いているのは、ホスト側（macOS等）で `pnpm install` した node_modules を
+# そのままbind mountすると、wrangler/workerd等のネイティブバイナリが
+# ホストOSとコンテナ内Linuxとで一致せず動かなくなるため。
+name: bitcraft-blog
+
+x-app-base: &app-base
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile.dev
+  working_dir: /app
+  environment:
+    NODE_ENV: development
+  depends_on:
+    install:
+      condition: service_completed_successfully
+
+services:
+  install:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    working_dir: /app
+    command: pnpm install
+    volumes:
+      - ..:/app
+      - node_modules:/app/node_modules
+
+  api:
+    <<: *app-base
+    # D1のローカル永続化先を明示し、webと同じ場所を指す（wrangler-stateボリューム）ことで
+    # apiで作ったdraftをwebのプレビューからも見られるようにする。
+    command: pnpm --filter @bitcraft/blog-api dev --port 8788 --ip 0.0.0.0 --persist-to /app/.wrangler-state
+    ports:
+      - "8788:8788"
+    volumes:
+      - ..:/app
+      - node_modules:/app/node_modules
+      - wrangler-state:/app/.wrangler-state
+
+  web:
+    <<: *app-base
+    command: pnpm --filter @bitcraft/blog-web dev --port 8787 --ip 0.0.0.0 --persist-to /app/.wrangler-state
+    ports:
+      - "8787:8787"
+    volumes:
+      - ..:/app
+      - node_modules:/app/node_modules
+      - wrangler-state:/app/.wrangler-state
+    environment:
+      NODE_ENV: development
+      # Service Bindingはローカルの別コンテナ間では解決できないため、apiClient側の
+      # 「env.APIがあれば使い、無ければAPI_BASE_URLへHTTP fetchする」フォールバックに
+      # 疎通先を渡す（apps/web側のコードが対応している前提。本番ではService Bindingが
+      # 有効なのでこの環境変数は使われない）。
+      API_BASE_URL: http://api:8788
+    depends_on:
+      install:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
+
+  mcp:
+    <<: *app-base
+    command: pnpm --filter @bitcraft/blog-mcp dev --port 8789 --ip 0.0.0.0
+    ports:
+      - "8789:8789"
+    volumes:
+      - ..:/app
+      - node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      # web同様、mcp→api の疎通もローカルではService Bindingが使えないためHTTPで代替する
+      # （apps/mcp側のapiClientが対応している前提）。
+      API_BASE_URL: http://api:8788
+    depends_on:
+      install:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
+
+volumes:
+  node_modules:
+  wrangler-state:

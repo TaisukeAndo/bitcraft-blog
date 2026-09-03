@@ -1,0 +1,60 @@
+/* デザイントークン（実装プラン6章の値をそのまま使う）。
+   ダークモード切り替えは要件に無いため実装しない（コードブロックのみ常時ダーク）。 */
+:root {
+  color-scheme: light;
+
+  /* ベース */
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f7f8fa;
+  --color-text: #16181d;
+  --color-text-meta: #5b6270;
+  --color-border: #e5e7eb;
+  --color-border-strong: #d7dae0;
+
+  /* アクセント */
+  --color-accent: #2f5de3;
+  --color-accent-hover: #1e3fae;
+  --color-accent-tint: #eaf0fe;
+
+  /* バッジ */
+  --color-badge-free: #1e9e6b;
+  --color-badge-free-bg: #e3f6ee;
+  --color-badge-paid: #a6741e;
+  --color-badge-paid-bg: #faf1de;
+
+  /* コードブロック（常時ダーク） */
+  --color-code-bg: #0d1117;
+  --color-code-text: #e6edf3;
+  --color-code-border: #21262d;
+
+  /* タイポグラフィ */
+  --font-heading: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --font-body: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic",
+    sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* レイアウト寸法 */
+  --content-width: 740px;
+  --page-max-width: 1200px;
+  --sidebar-width: 280px;
+  --book-sidebar-width: 260px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --shadow-card: 0 1px 2px rgba(22, 24, 29, 0.04), 0 1px 8px rgba(22, 24, 29, 0.06);
+  --shadow-card-hover: 0 4px 16px rgba(22, 24, 29, 0.1);
+
+  --header-height: 64px;
+}

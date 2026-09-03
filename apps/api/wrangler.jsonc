@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bitcraft-blog-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bitcraft-blog",
+      // terraform apply（実装プラン10章・storage.tf）実行後、Cloudflareが払い出す
+      // 実際のD1データベースIDに置き換える。それまではこのプレースホルダーのまま。
+      "database_id": "REPLACE_AFTER_TERRAFORM_APPLY",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "bitcraft-blog-media"
+    }
+  ]
+  // Custom Domain (blog-api.bitcraft.work) は terraform/workers.tf
+  // （実装プラン10章）で最初から接続する。bitcraft-siteのようなPhase 8までの
+  // 段階カットオーバーは不要（実装プラン1章）。
+}

@@ -1,0 +1,65 @@
+/* コードブロック: 言語ラベル＋コピーボタン（実装プラン6章）。
+   実際の見出しバーはpublic/js/code-block.jsがrehype-highlight出力の
+   <pre><code class="hljs language-xxx"> を実行時にラップして生成する。 */
+.prose pre {
+  background: var(--color-code-bg);
+  color: var(--color-code-text);
+  border: 1px solid var(--color-code-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  margin: var(--space-5) 0;
+}
+
+.code-block {
+  margin: var(--space-5) 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-code-border);
+}
+
+.code-block pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+}
+
+.code-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  background: #161b22;
+  border-bottom: 1px solid var(--color-code-border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #9da7b3;
+}
+
+.code-block__lang {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.code-block__copy {
+  background: transparent;
+  border: 1px solid var(--color-code-border);
+  color: #9da7b3;
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.code-block__copy:hover {
+  color: #ffffff;
+  border-color: #9da7b3;
+}
+
+.code-block__copy[data-copied="true"] {
+  color: var(--color-badge-free);
+  border-color: var(--color-badge-free);
+}

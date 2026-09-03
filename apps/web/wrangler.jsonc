@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bitcraft-blog-web",
+  "main": "src/index.tsx",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "none"
+  },
+  // 注意: apps/web はD1に対して読み取り専用で使う（SELECT専用。書き込み・
+  // マイグレーション適用はapps/api側のみが担う。実装プラン2章・前提のcreateDbを流用）。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bitcraft-blog",
+      // apps/api/wrangler.jsonc と必ず同じ値にする（terraform apply後に同じ実IDへ
+      // 置き換える）。ローカル開発でもwranglerはdatabase_idをキーにD1のローカル
+      // SQLiteファイルを分けて永続化するため、値がずれるとapps/apiで作成した
+      // データがapps/webから「no such table」で見えなくなる不具合を実機で確認した。
+      "database_id": "REPLACE_AFTER_TERRAFORM_APPLY"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "bitcraft-blog-media"
+    }
+  ],
+  // src/styles/*.css をText moduleとしてimportし、ビルド無しで<style>タグへ
+  // インライン配信するためのルール（実装プラン6章「素のCSS・ビルドステップ不要」）。
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/*.css"],
+      // wranglerの既定ルール（*.txt/*.html/*.sqlをTextとして扱う）を無効化しない
+      // ようにする（省略するとこのカスタムルールが既定ルールを黙って上書きし、
+      // ビルド時に警告が出る）。
+      "fallthrough": true
+    }
+  ]
+  // Phase1でCustom Domain (blog.bitcraft.work) をTerraformから接続する（実装プラン1章・10章）。
+}

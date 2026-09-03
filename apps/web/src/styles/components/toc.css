@@ -1,0 +1,68 @@
+/* デスクトップ右マージンの追従目次（現在地ハイライトはtoc-scrollspy.jsが担当）。
+   実装プラン6章。 */
+.toc-sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-5));
+  font-size: 0.85rem;
+  max-height: calc(100vh - var(--header-height) - var(--space-8));
+  overflow-y: auto;
+}
+
+.toc-sidebar__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-meta);
+  margin-bottom: var(--space-3);
+  letter-spacing: 0.04em;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 2px solid var(--color-border);
+}
+
+.toc-list__item a {
+  display: block;
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  color: var(--color-text-meta);
+  line-height: 1.5;
+}
+
+.toc-list__item a:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.toc-list__item--depth-3 a {
+  padding-left: var(--space-6);
+  font-size: 0.8rem;
+}
+
+/* toc-scrollspy.js が現在見出しの<a>にこのクラスを付与する */
+.toc-list__item a.is-active {
+  color: var(--color-accent);
+  border-left-color: var(--color-accent);
+  font-weight: 700;
+}
+
+/* Bookチャプターページ用: .book-layout は2カラム（サイドバー+本文）のため、
+   目次は右側の追従列ではなく本文先頭の折りたたみブロックとして表示する
+   （実装プラン6章。Zenn Book等の技術書レイアウトを踏襲）。 */
+.toc-sidebar--inline {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.toc-sidebar--inline .toc-sidebar__title {
+  cursor: pointer;
+}

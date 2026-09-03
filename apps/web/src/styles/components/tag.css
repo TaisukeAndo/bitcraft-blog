@@ -1,0 +1,46 @@
+/* ピル型タグ（アクセントの薄色背景。実装プラン6章）。 */
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+a.tag-pill:hover {
+  background: var(--color-accent);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.tag-pill--count::after {
+  content: attr(data-count);
+  margin-left: var(--space-1);
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* 無料 / 有料予定バッジ（Book・チャプター共通。実装プラン6章） */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.badge--free {
+  background: var(--color-badge-free-bg);
+  color: var(--color-badge-free);
+}
+
+.badge--paid {
+  background: var(--color-badge-paid-bg);
+  color: var(--color-badge-paid);
+}

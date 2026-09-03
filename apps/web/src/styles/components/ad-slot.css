@@ -1,0 +1,23 @@
+/* 広告枠。実際の広告有無に関わらず固定min-heightを確保しCLSを防ぐ（実装プラン8章）。
+   Phase4本格導入までは空のプレースホルダーとして描画される（public/js/ads.js参照）。 */
+.ad-slot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.ad-slot--empty {
+  background: var(--color-bg-subtle);
+  border: 1px dashed var(--color-border-strong);
+}
+
+.ad-slot-wrap {
+  margin: var(--space-6) 0;
+}
+
+.ad-slot-wrap--sidebar {
+  margin: 0;
+}

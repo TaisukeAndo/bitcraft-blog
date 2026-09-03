@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bitcraft-blog-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // agents(agents/mcp/server)がnode:async_hooksに依存するため必須
+  // （付けない場合、ビルド時に警告が出てランタイムでエラーになりうる。
+  // bitcraft-site/apps/mcpで実際に確認済み）。
+  "compatibility_flags": ["nodejs_compat"],
+  // apps/apiへの委譲用Service Binding。apps/mcpはD1/R2を一切扱わず、
+  // 認証確認・コンテンツ操作はすべてこのBinding経由でapps/apiに委譲する
+  // （実装プラン4章）。ローカルのDocker Compose環境ではコンテナ間で
+  // Service Bindingが解決できないため、環境変数 API_BASE_URL
+  // （例: http://api:8788）を渡すとプレーンHTTP fetchにフォールバックする
+  // （実装プラン9章、src/lib/api-client.ts）。
+  "services": [
+    {
+      "binding": "API",
+      "service": "bitcraft-blog-api"
+    }
+  ]
+  // ステートレスなcreateMcpHandler()を採用しているため、McpAgent(legacy)が
+  // 前提としていたDurable Objects関連の設定(durable_objects/migrations)は
+  // 不要（bitcraft-site/apps/mcpと同じ、agents SDK 0.21時点の推奨構成）。
+  // Custom Domain (blog-mcp.bitcraft.work) はTerraformで最初から接続する
+  // （実装プラン1章。bitcraft-siteのような段階的カットオーバーは不要）。
+}

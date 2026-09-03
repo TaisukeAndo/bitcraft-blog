@@ -1,0 +1,132 @@
+/* Book閲覧の左固定階層サイドバー（章番号＋タイトル、現在地はアクセント左ボーダー、
+   価格をサイドバー上部に表示。実装プラン6章）。 */
+.book-sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-5));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.book-sidebar__header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
+.book-sidebar__title {
+  font-family: var(--font-heading);
+  font-size: 0.98rem;
+  margin: 0 0 var(--space-2);
+}
+
+.book-sidebar__title a {
+  color: var(--color-text);
+}
+
+.book-sidebar__price {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--color-text-meta);
+}
+
+.book-sidebar__price strong {
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.book-sidebar__chapters {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2) 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.book-sidebar__chapter {
+  border-left: 3px solid transparent;
+}
+
+.book-sidebar__chapter a {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.book-sidebar__chapter a > span:nth-child(2) {
+  flex: 1 1 auto;
+}
+
+.book-sidebar__chapter a:hover {
+  background: var(--color-bg-subtle);
+  text-decoration: none;
+}
+
+.book-sidebar__chapter--current {
+  border-left-color: var(--color-accent);
+  background: var(--color-accent-tint);
+}
+
+.book-sidebar__chapter--current a {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.book-sidebar__chapter-number {
+  color: var(--color-text-meta);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* 最終章末CTA（サイドバー上部と対で価格を再掲する。実装プラン6章） */
+.book-cta {
+  margin-top: var(--space-7);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.book-cta__price {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+.book-cta__note {
+  color: var(--color-text-meta);
+  font-size: 0.82rem;
+  margin-top: var(--space-3);
+}
+
+/* Book詳細ページ（pages/book-detail.tsx）固有の装飾。 */
+.book-detail__cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+}
+
+.book-detail__cta-button {
+  display: inline-block;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.book-detail__cta-button:hover {
+  background: var(--color-accent-hover);
+  text-decoration: none;
+}

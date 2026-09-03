@@ -1,0 +1,21 @@
+{
+  "name": "bitcraft-blog",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "eslint .",
+    "test": "pnpm -r --if-present run test",
+    "dev:web": "pnpm --filter @bitcraft/blog-web dev",
+    "dev:api": "pnpm --filter @bitcraft/blog-api dev",
+    "dev:mcp": "pnpm --filter @bitcraft/blog-mcp dev"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "globals": "^17.12.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0"
+  }
+}
