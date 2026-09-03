@@ -32,6 +32,9 @@ importers:
       '@bitcraft/blog-shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@cf-wasm/photon':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@hono/swagger-ui':
         specifier: ^0.5.0
         version: 0.5.3(hono@4.13.5)
@@ -316,6 +319,12 @@ packages:
   '@babel/types@8.0.4':
     resolution: {integrity: sha512-eY+Yn3dCqTGmyiq2QRU66lA5FL8lqqqvecHt0fF3uHONIa7ToYsaCiWV8lOKqAs0Rb2SjixiKFROngnulPtt2g==}
     engines: {node: ^22.18.0 || >=24.11.0}
+
+  '@cf-wasm/internals@0.2.0':
+    resolution: {integrity: sha512-QwMNETkTCtrx0uCzjJPRCTyok0OZNvOry9alfG8a8TpHo7oPJ17htPMDG4ptudpwe9F0VtJHy9+nOzJmupteiQ==}
+
+  '@cf-wasm/photon@0.4.0':
+    resolution: {integrity: sha512-PQcN6sThZAR/V6SH2MQmeFndDDhGfOxvra6UStyaBbkDHrgTPKvB+WapAhh0/TA9LsRAUaX/rEEw6hvY9uphbQ==}
 
   '@cfworker/json-schema@4.1.1':
     resolution: {integrity: sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==}
@@ -3441,6 +3450,12 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 8.0.0
       '@babel/helper-validator-identifier': 8.0.4
+
+  '@cf-wasm/internals@0.2.0': {}
+
+  '@cf-wasm/photon@0.4.0':
+    dependencies:
+      '@cf-wasm/internals': 0.2.0
 
   '@cfworker/json-schema@4.1.1': {}
 

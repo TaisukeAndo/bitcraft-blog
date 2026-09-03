@@ -9,17 +9,16 @@ export interface ImageDimensions {
   height: number;
 }
 
-export function readImageDimensions(bytes: Uint8Array, contentType: string): ImageDimensions | null {
+export function readImageDimensions(bytes: Uint8Array): ImageDimensions | null {
   try {
-    if (contentType === "image/png" || isPngSignature(bytes)) {
-      return readPngDimensions(bytes);
-    }
-    if (contentType === "image/jpeg" || contentType === "image/jpg" || isJpegSignature(bytes)) {
-      return readJpegDimensions(bytes);
-    }
-    if (contentType === "image/gif" || isGifSignature(bytes)) {
-      return readGifDimensions(bytes);
-    }
+    // 実際のマジックバイト（シグネチャ）だけで判定する。以前はcontentType
+    // （クライアント申告値、実バイト列と一致する保証は無い）が一致するだけで
+    // シグネチャチェックを素通りしており、壊れたファイル・偽装された
+    // content-typeに対して意味の無いwidth/heightを返す不具合があった
+    // （lib/image-processing.tsのデコード失敗時フォールバック経路で実機確認して修正）。
+    if (isPngSignature(bytes)) return readPngDimensions(bytes);
+    if (isJpegSignature(bytes)) return readJpegDimensions(bytes);
+    if (isGifSignature(bytes)) return readGifDimensions(bytes);
     return null;
   } catch {
     // バイナリが壊れている・想定外の形式の場合は諦めてnullを返す。

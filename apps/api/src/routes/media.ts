@@ -7,6 +7,12 @@ import type { Media } from "@bitcraft/blog-shared";
 import type { Bindings } from "../lib/bindings";
 import { getDb } from "../lib/db";
 import { readImageDimensions } from "../lib/image-dimensions";
+import {
+  MAX_UPLOAD_BYTES,
+  isProcessableImage,
+  processImage,
+  withExtensionForContentType,
+} from "../lib/image-processing";
 import { jsonError } from "../middleware/error-handler";
 
 type MediaRow = typeof media.$inferSelect;
@@ -98,12 +104,15 @@ export function registerMediaRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
   const uploadRoute = createRoute({
     method: "post",
     path: "/v1/media",
-    summary: "メディアをアップロードする（dataBase64をR2へ保存しD1にメタデータを記録）",
+    summary:
+      "メディアをアップロードする（dataBase64をR2へ保存しD1にメタデータを記録。" +
+      "対応画像形式は自動的に圧縮・リサイズしてから保存する）",
     tags: ["media"],
     security: [{ bearerAuth: [] }],
     request: { body: { content: { "application/json": { schema: mediaUploadSchema } } } },
     responses: {
       201: { description: "アップロードしたメディア", content: { "application/json": { schema: mediaResponseSchema } } },
+      400: { description: "バリデーションエラー（アップロードサイズが上限を超えている等）" },
       401: { description: "認証エラー" },
     },
   });
@@ -111,12 +120,35 @@ export function registerMediaRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
   app.openapi(uploadRoute, async (c) => {
     const body = c.req.valid("json");
     const bytes = decodeBase64(body.dataBase64);
+    if (bytes.length > MAX_UPLOAD_BYTES) {
+      return jsonError(
+        c,
+        "VALIDATION_ERROR",
+        `アップロードサイズが上限（${Math.floor(MAX_UPLOAD_BYTES / (1024 * 1024))}MB）を超えています`,
+        400,
+      );
+    }
+
+    // 対応画像形式（JPEG/PNG/WebP）は自動的に圧縮・リサイズする（実装プラン3章に追記）。
+    // GIF・SVG等の非対応形式や、デコードに失敗した画像はprocessed=nullとなり、
+    // 元のバイト列・contentTypeのまま保存する（lib/image-processing.ts参照）。
+    const processed = isProcessableImage(body.contentType) ? processImage(bytes, body.contentType) : null;
+    const finalBytes = processed?.bytes ?? bytes;
+    const finalContentType = processed?.contentType ?? body.contentType;
+    const finalFilename = processed
+      ? withExtensionForContentType(body.filename, processed.contentType)
+      : body.filename;
+
     const ownerType = body.ownerType ?? "misc";
-    const r2Key = buildR2Key({ ownerType, ownerSlug: body.ownerSlug, filename: body.filename });
+    const r2Key = buildR2Key({ ownerType, ownerSlug: body.ownerSlug, filename: finalFilename });
 
-    await c.env.MEDIA.put(r2Key, bytes, { httpMetadata: { contentType: body.contentType } });
+    await c.env.MEDIA.put(r2Key, finalBytes, { httpMetadata: { contentType: finalContentType } });
 
-    const dimensions = body.contentType.startsWith("image/") ? readImageDimensions(bytes, body.contentType) : null;
+    const dimensions = processed
+      ? { width: processed.width, height: processed.height }
+      : body.contentType.startsWith("image/")
+        ? readImageDimensions(bytes)
+        : null;
 
     const db = getDb(c.env);
     const inserted = await db
@@ -126,8 +158,8 @@ export function registerMediaRoutes(app: OpenAPIHono<{ Bindings: Bindings }>) {
         ownerType,
         ownerSlug: body.ownerSlug ?? null,
         purpose: body.purpose ?? null,
-        contentType: body.contentType,
-        sizeBytes: bytes.length,
+        contentType: finalContentType,
+        sizeBytes: finalBytes.length,
         width: dimensions?.width ?? null,
         height: dimensions?.height ?? null,
         altText: body.altText ?? null,
