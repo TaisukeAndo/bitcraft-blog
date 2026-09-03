@@ -1,7 +1,6 @@
 import type { FC } from "hono/jsx";
 import type { TocEntry } from "@bitcraft/blog-shared";
 import { BookSidebar, type BookSidebarChapter } from "../components/book-sidebar";
-import { Badge } from "../components/tag-pill";
 import { readingTimeLabel } from "../lib/format";
 
 export interface ChapterPagerLink {
@@ -12,7 +11,7 @@ export interface ChapterPagerLink {
 export interface ChapterDetailPageProps {
   bookSlug: string;
   bookTitle: string;
-  priceYen: number;
+  coverImageKey: string | null;
   pricingModel: "free" | "paid_planned";
   chapters: BookSidebarChapter[];
   currentChapterSlug: string;
@@ -28,11 +27,12 @@ export interface ChapterDetailPageProps {
 
 // Bookチャプター本文ページ（実装プラン6章）。price_yen>0 かつ is_free_preview=false でも
 // 決済ゲート未実装の現段階では閲覧を制限せず「有料予定」の告知のみ表示する
-// （実装プラン2章「決済なしでの有料表現」）。
+// （実装プラン2章「決済なしでの有料表現」）。無料/有料バッジ自体はBook詳細ページに
+// のみ出すため、このページと左サイドバーには表示しない（ユーザー指示により2026-09-04変更）。
 export const ChapterDetailPage: FC<ChapterDetailPageProps> = ({
   bookSlug,
   bookTitle,
-  priceYen,
+  coverImageKey,
   pricingModel,
   chapters,
   currentChapterSlug,
@@ -47,7 +47,6 @@ export const ChapterDetailPage: FC<ChapterDetailPageProps> = ({
 }) => {
   const reading = readingTimeLabel(readingTimeMin);
   const headingToc = toc.filter((entry) => entry.depth <= 3);
-  const isFree = pricingModel === "free" || isFreePreview;
   const showsPaidNotice = pricingModel === "paid_planned" && !isFreePreview;
 
   return (
@@ -55,8 +54,7 @@ export const ChapterDetailPage: FC<ChapterDetailPageProps> = ({
       <BookSidebar
         bookSlug={bookSlug}
         bookTitle={bookTitle}
-        priceYen={priceYen}
-        pricingModel={pricingModel}
+        coverImageKey={coverImageKey}
         chapters={chapters}
         currentChapterSlug={currentChapterSlug}
       />
@@ -69,10 +67,11 @@ export const ChapterDetailPage: FC<ChapterDetailPageProps> = ({
           <span class="book-sidebar__chapter-number">{String(chapterNumber).padStart(2, "0")}</span>{" "}
           {chapterTitle}
         </h1>
-        <div class="article-meta">
-          {isFree ? <Badge kind="free" /> : <Badge kind="paid" />}
-          {reading ? <span>{reading}</span> : null}
-        </div>
+        {reading ? (
+          <div class="article-meta">
+            <span>{reading}</span>
+          </div>
+        ) : null}
 
         {showsPaidNotice ? (
           <p class="book-cta__note">

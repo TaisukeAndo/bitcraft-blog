@@ -327,8 +327,10 @@ app.get("/books", async (c) => {
   });
 });
 
-/** book_chaptersをBookSidebar/JSON-LD向けの共通形式に変換する（公開済みのみ、chapterNumber昇順）。 */
-async function loadPublishedChapters(db: ReturnType<typeof getDb>, bookId: number, pricingModel: "free" | "paid_planned") {
+/** book_chaptersをBookSidebar/JSON-LD向けの共通形式に変換する（公開済みのみ、chapterNumber昇順）。
+    無料/有料バッジはBook詳細ページのみに出す方針のため、ここではisFreeを持たない
+    （ユーザー指示により2026-09-04変更）。 */
+async function loadPublishedChapters(db: ReturnType<typeof getDb>, bookId: number) {
   const rows = await db
     .select()
     .from(bookChapters)
@@ -338,7 +340,6 @@ async function loadPublishedChapters(db: ReturnType<typeof getDb>, bookId: numbe
     slug: r.slug,
     chapterNumber: r.chapterNumber,
     title: r.title,
-    isFree: pricingModel === "free" || r.isFreePreview,
   }));
   return { rows, sidebarChapters };
 }
@@ -351,7 +352,7 @@ app.get("/books/:slug", async (c) => {
     const book = await db.select().from(books).where(and(eq(books.slug, slug), eq(books.status, "published"))).get();
     if (!book) return c.notFound();
 
-    const { rows, sidebarChapters } = await loadPublishedChapters(db, book.id, book.pricingModel);
+    const { rows, sidebarChapters } = await loadPublishedChapters(db, book.id);
     const coverPath = mediaUrl(book.coverImageKey);
     const coverAbsolute = coverPath ? `${SITE_ORIGIN}${coverPath}` : null;
 
@@ -401,7 +402,7 @@ app.get("/books/:slug/:chapterSlug", async (c) => {
     const book = await db.select().from(books).where(and(eq(books.slug, slug), eq(books.status, "published"))).get();
     if (!book) return c.notFound();
 
-    const { rows, sidebarChapters } = await loadPublishedChapters(db, book.id, book.pricingModel);
+    const { rows, sidebarChapters } = await loadPublishedChapters(db, book.id);
     const index = rows.findIndex((r) => r.slug === chapterSlug);
     if (index === -1) return c.notFound();
     const chapter = rows[index];
@@ -435,7 +436,7 @@ app.get("/books/:slug/:chapterSlug", async (c) => {
           <ChapterDetailPage
             bookSlug={book.slug}
             bookTitle={book.title}
-            priceYen={book.priceYen}
+            coverImageKey={book.coverImageKey}
             pricingModel={book.pricingModel}
             chapters={sidebarChapters}
             currentChapterSlug={chapter.slug}

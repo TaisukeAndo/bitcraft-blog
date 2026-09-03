@@ -1,48 +1,47 @@
 import type { FC } from "hono/jsx";
-import { Badge } from "./tag-pill";
+import { mediaUrl } from "../lib/media-url";
+import { ThumbPlaceholder } from "./thumb-placeholder";
 
 export interface BookSidebarChapter {
   slug: string;
   chapterNumber: number;
   title: string;
-  isFree: boolean; // isFreePreview===true か、book.pricingModel==="free" のとき true
 }
 
 export interface BookSidebarProps {
   bookSlug: string;
   bookTitle: string;
-  priceYen: number;
-  pricingModel: "free" | "paid_planned";
+  coverImageKey: string | null;
   chapters: BookSidebarChapter[];
-  currentChapterSlug?: string; // 未指定ならBook詳細ページ扱い
+  currentChapterSlug?: string; // 未指定ならBook詳細ページ扱い（現状はchapter-detail.tsxのみが利用）
 }
 
-// Book閲覧の左固定階層サイドバー（実装プラン6章）。/books/:slug と
-// /books/:slug/:chapterSlug の両方から共通で使う。
+// Bookチャプター本文ページ（chapter-detail.tsx）の左固定階層サイドバー。
+// 無料/有料の表記はBook詳細ページ（book-detail.tsx）にのみ出す方針のため、
+// ここでは価格・バッジ類を一切表示しない（Zennの本トップ/読書ページの出し分けに
+// 合わせた。ユーザー指示により2026-09-04変更）。
 export const BookSidebar: FC<BookSidebarProps> = ({
   bookSlug,
   bookTitle,
-  priceYen,
-  pricingModel,
+  coverImageKey,
   chapters,
   currentChapterSlug,
 }) => {
+  const cover = mediaUrl(coverImageKey);
+
   return (
     <aside class="book-sidebar">
       <div class="book-sidebar__header">
-        <h2 class="book-sidebar__title">
-          <a href={`/books/${bookSlug}`}>{bookTitle}</a>
-        </h2>
-        <div class="book-sidebar__price">
-          {pricingModel === "free" ? (
-            <Badge kind="free" />
-          ) : (
-            <>
-              <Badge kind="paid" />
-              <strong>¥{priceYen.toLocaleString("ja-JP")}</strong>
-            </>
-          )}
-        </div>
+        <a class="book-sidebar__book" href={`/books/${bookSlug}`}>
+          <div class="book-sidebar__cover">
+            {cover ? (
+              <img src={cover} alt="" width={56} height={56} loading="lazy" />
+            ) : (
+              <ThumbPlaceholder kind="book" />
+            )}
+          </div>
+          <span class="book-sidebar__title">{bookTitle}</span>
+        </a>
       </div>
       <ol class="book-sidebar__chapters">
         {chapters.map((chapter) => (
@@ -56,11 +55,6 @@ export const BookSidebar: FC<BookSidebarProps> = ({
                 {String(chapter.chapterNumber).padStart(2, "0")}
               </span>
               <span>{chapter.title}</span>
-              {chapter.isFree ? (
-                <span class="badge badge--free">無料</span>
-              ) : (
-                <span class="badge badge--paid">有料予定</span>
-              )}
             </a>
           </li>
         ))}
